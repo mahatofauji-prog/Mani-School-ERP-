@@ -20,7 +20,7 @@ app.use(express.urlencoded({ limit: "50mb", extended: true }));
 
 // Normalize request path for Vercel serverless functions if /api prefix is stripped
 app.use((req, res, next) => {
-  if (req.url && !req.url.startsWith("/api")) {
+  if (process.env.VERCEL && req.url && !req.url.startsWith("/api")) {
     req.url = "/api" + (req.url.startsWith("/") ? "" : "/") + req.url;
   }
   next();
