@@ -1,0 +1,28 @@
+{
+  "summary": "Full regression of AuthContext refactor + QR/Biometric feature-flag work. 17/17 backend pytest cases passed (auth, platform settings defaults & persistence, QR scan happy path + all forbidden branches + regenerate history preservation, global QR OFF blocks, per-school QR OFF blocks, biometric locked unless BOTH global and per-school flags ON). Frontend: Founder login, session-persist-after-reload, and logout all work; Platform Settings renders the new 'Attendance Features' section with QR toggle (default ENABLED) and Biometric toggle (default DISABLED); toggling either and saving persists across reload, and reverts cleanly. Camera-based QR *capture* is not exercised (no device) — the /api/qr/scan endpoint is exhaustively tested by direct POSTs using real student qr_tokens, which is the equivalent guarantee. No regressions introduced by the AuthContext / QrAttendancePanel edits.",
+  "backend_issues": { "critical": [], "minor": [] },
+  "frontend_issues": {
+    "ui_bugs": [],
+    "integration_issues": [],
+    "design_issues": []
+  },
+  "test_report_links": [
+    "/app/backend/tests/test_qr_attendance.py",
+    "/app/test_reports/pytest/qr_results.xml"
+  ],
+  "action_items": [],
+  "critical_code_review_comments": [
+    "QrAttendancePanel.jsx uses student `name` as the React map key for the 'Marked Present' list. Two different students with the same display name (very possible in schools) will collide and hide one entry. Prefer a stable id like student_id (returned by /qr/scan) as the key.",
+    "routes_qr.py `student_view` returns id/name/roll/class/section/photo but does NOT include the school-scoped student_id explicitly — the frontend can consume `student.id`, but the response would be more resilient if it also returned `attendance_id` for optimistic UI updates.",
+    "auth_utils.py qr_enabled_for_school() treats a missing school document as False (correct), but returns True for a school whose `qr_attendance` field is missing (default-on). This is intentional per spec; just note that any older schools created before this field existed silently participate in QR — desired behaviour, documented for clarity.",
+    "AuthContext.refreshMe: current catch always sets user=false on any error, which is correct, but for transient network errors this forces a login redirect. Consider distinguishing network errors from 401 in the future (low priority)."
+  ],
+  "updated_files": ["/app/backend/tests/test_qr_attendance.py"],
+  "success_rate": { "backend": "100% (17/17)", "frontend": "100% (login, reload-persistence, logout, settings defaults, QR toggle persistence, Biometric toggle persistence)" },
+  "test_credentials": "Founder mahatofauji@gmail.com / ManiFounder@2026 (from /app/memory/test_credentials.md). All other accounts were created and hard-deleted by the test.",
+  "seed_data_creation": "Two temp schools (code prefix TSTQR*) with admins, one class+section+teacher+student each plus an 'other-class' student, were created via the API for the QR scan matrix. All hard-deleted at teardown along with derived users, classes, sections and attendance rows. Platform settings restored to qr_attendance=true, biometric_attendance=false. Final DB state matches pre-test baseline (1 pre-existing 'Mani Public School' school + 1 admin + 1 founder).",
+  "retest_needed": false,
+  "main_agent_can_self_test": true,
+  "context_for_next_testing_agent": "Reusable regression suite is /app/backend/tests/test_qr_attendance.py — run with `pytest tests/test_qr_attendance.py -v -o addopts=''` from /app/backend. The suite is self-contained: creates its own schools/users, hard-deletes them at teardown and restores platform QR flag. Camera QR *capture* on the UI cannot be run headlessly; the equivalent /api/qr/scan security matrix is fully covered here.",
+  "rca of the issue": "N/A — no bugs found. The AuthContext.jsx catch-block refactor (log-and-set-user-false in login/logout/refreshMe) and QrAttendancePanel.jsx catch-block warn + React map key change did not regress any behaviour. Auth, session, and QR scan API all behave correctly."
+}

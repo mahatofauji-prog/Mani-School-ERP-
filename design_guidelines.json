@@ -1,0 +1,117 @@
+{
+  "project_name": "MANI SCHOOL ERP",
+  "theme": "Light theme preferred for ERP data density, with deep dark sidebar for contrast.",
+  "typography": {
+    "headings": {
+      "family": "Outfit, sans-serif",
+      "weights": ["500", "600", "700"],
+      "styling": "tracking-tight"
+    },
+    "body": {
+      "family": "IBM Plex Sans, sans-serif",
+      "weights": ["400", "500"]
+    },
+    "hierarchy": {
+      "h1": "text-4xl sm:text-5xl font-bold tracking-tighter text-slate-900",
+      "h2": "text-2xl sm:text-3xl font-semibold tracking-tight text-slate-800",
+      "h3": "text-xl sm:text-2xl font-medium tracking-tight text-slate-800",
+      "body": "text-base leading-relaxed text-slate-600",
+      "small_labels": "text-xs font-semibold tracking-[0.2em] uppercase text-slate-500"
+    }
+  },
+  "colors": {
+    "archetype": "ORGANIC & EARTHY mixed with SWISS & HIGH-CONTRAST for trust and precision.",
+    "primary": "#14532D", 
+    "primary_hover": "#166534",
+    "secondary": "#CA8A04",
+    "background": "#FAFAF9",
+    "card_background": "#FFFFFF",
+    "sidebar_background": "#0F172A",
+    "sidebar_text": "#F8FAFC",
+    "text_main": "#0F172A",
+    "text_muted": "#64748B",
+    "border": "#E2E8F0",
+    "destructive": "#DC2626",
+    "success": "#059669"
+  },
+  "visual_enhancers": {
+    "shadows": "Minimal. Use flat solid cards with 1px border. Hover states get shadow-md.",
+    "borders": "1px solid #E2E8F0 for cards and tables. Sharp and clean.",
+    "radius": "rounded-md or rounded-lg maximum (6px - 8px) for a crisp professional feel.",
+    "glassmorphism": "Avoid in data-heavy areas. Use flat solid surfaces to prevent visual refraction of data."
+  },
+  "components": {
+    "buttons": "Rounded-md. Primary buttons use Deep Green (#14532D) with pure white text. Hover state must translate-y-[-1px] with increased shadow.",
+    "cards": "Flat background (bg-white), 1px subtle border (border-slate-200), no shadow by default. Hover: slight lift (-translate-y-1), subtle shadow (shadow-lg), border color darkens.",
+    "tables": "Muted gridlines, status chips for labels. Table headers must have uppercase tracking-widest text-xs.",
+    "forms_inputs": "Use Shadcn Input/Select. Background white, border slate-200, focus ring is primary green (ring-green-900/20).",
+    "sidebar": "Collapsible left sidebar. Dark background (#0f172a) with light text/icons for contrast.",
+    "toasts": "Use Sonner component (/app/frontend/src/components/ui/sonner.js). Bottom-right placement."
+  },
+  "grids": {
+    "dashboard_mode": "High Density Grid (For Dashboards/Analytics). Base Grid: grid-cols-1 md:grid-cols-3 lg:grid-cols-4. Tight gaps (gap-4 or gap-6).",
+    "spans": {
+      "summary_metric": "col-span-1 (Single metric card)",
+      "primary_chart": "col-span-2 row-span-2 or col-span-3 (Main data view)",
+      "list_feed": "col-span-1 row-span-2 (Tall narrow lists like recent activities)"
+    }
+  },
+  "layouts": {
+    "login_screen": "Split screen layout. Left side: High-impact hero image of school architecture with gradient overlay. Right side: Clean, centered login form with logo.",
+    "dashboard": "Persistent collapsible Left Sidebar + Top Header (minimal) + Main scrollable content area with generous padding (p-6 to p-8)."
+  },
+  "motion": {
+    "hover_states": "All interactive elements must transition smoothly: transition: transform 0.2s ease, opacity 0.2s ease.",
+    "page_transitions": "Staggered entrance animations for dashboard cards and list items.",
+    "loading_states": "Skeleton loaders for data components before they populate."
+  },
+  "accessibility": {
+    "contrast": "Ensure all text meets APCA/WCAG AA standards. No light gray text on white.",
+    "focus": "All actionable items must have explicit focus states (focus:ring-2).",
+    "testing": "All interactive elements MUST include data-testid attribute (e.g., data-testid='login-submit-button')."
+  },
+  "media": {
+    "icons": "Use lucide-react (already installed). Phosphor-icons allowed if extra polish is needed.",
+    "images": "Use realistic portraits for profiles, real modern school architecture for login."
+  },
+  "image_urls": {
+    "login_hero_background": {
+      "url": "https://images.pexels.com/photos/15261241/pexels-photo-15261241.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=650&w=940",
+      "description": "Modernist architecture for the universal login screen background."
+    },
+    "login_hero_alt": {
+      "url": "https://images.unsplash.com/photo-1614595737683-1740e41bfaac?crop=entropy&cs=srgb&fm=jpg&ixid=M3w4NjA2MDV8MHwxfHNlYXJjaHwzfHxtb2Rlcm4lMjBzY2hvb2wlMjBidWlsZGluZyUyMGFyY2hpdGVjdHVyZXxlbnwwfHx8fDE3ODc4OTk3MjV8MA&ixlib=rb-4.1.0&q=85",
+      "description": "Alternative clean white concrete school building."
+    },
+    "avatar_placeholder_1": {
+      "url": "https://images.unsplash.com/photo-1590650213165-c1fef80648c4?crop=entropy&cs=srgb&fm=jpg&ixid=M3w3NTY2Njd8MHwxfHNlYXJjaHwxfHxwcm9mZXNzaW9uYWwlMjB0ZWFjaGVyJTIwcG9ydHJhaXR8ZW58MHx8fHwxNzg3ODQwNTY1fDA&ixlib=rb-4.1.0&q=85",
+      "description": "Professional female teacher portrait for dashboard profile."
+    },
+    "avatar_placeholder_2": {
+      "url": "https://images.unsplash.com/photo-1574281570877-bd815ebb50a4?crop=entropy&cs=srgb&fm=jpg&ixid=M3w3NTY2Njd8MHwxfHNlYXJjaHw0fHxwcm9mZXNzaW9uYWwlMjB0ZWFjaGVyJTIwcG9ydHJhaXR8ZW58MHx8fHwxNzg3ODQwNTY1fDA&ixlib=rb-4.1.0&q=85",
+      "description": "Professional male portrait for Founder/Admin profile."
+    }
+  },
+  "instructions_to_main_agent": [
+    "Install required fonts from Google Fonts: Outfit and IBM Plex Sans.",
+    "Use Shadcn UI components for standard elements: cards, tables, forms, modals, tabs, dropdowns, sonner.",
+    "Build the dashboard layout with a collapsible sidebar and a clean top nav.",
+    "Implement the login page with a split layout (image on one side, form on the other).",
+    "Ensure strict role-based rendering is mocked/handled smoothly (show different dashboard views based on selected role).",
+    "Use Recharts (Shadcn charts) for any analytics visualizations in the Founder/Admin dashboard.",
+    "Add 'data-testid' to all buttons, inputs, and links."
+  ],
+  "UNIVERSAL_GUIDELINES_FOR_MAIN_AGENT": [
+    "Do not use generic centered layouts or simplistic gradients.",
+    "Do not use dark colors as gradients.",
+    "You MUST NOT apply universal transition (transition: all). Use specific transitions.",
+    "You MUST NOT center align the app container (.App { text-align: center; }).",
+    "Always use modern button styles (pill-shaped or rounded-md) with hover lift.",
+    "NEVER use AI assistant emojis for icons.",
+    "Create depth through layered design elements and 1px crisp borders.",
+    "Use 2-3x more spacing than feels comfortable. Padding in cards should be p-6 or p-8.",
+    "Prioritize using pre-existing components from src/components/ui.",
+    "Use 'sonner' for toasts.",
+    "Never use placeholder image URLs like via.placeholder.com. Use the provided image_urls."
+  ]
+}

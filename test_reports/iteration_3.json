@@ -1,0 +1,50 @@
+{
+  "summary": "Iteration 3 - Teacher Portal 'Digital Classroom' end-to-end testing. Added /app/backend/tests/test_classroom.py with 24 tests covering: teacher dashboard fields (my_classes/students/homework/materials/videos/subjects/school_name/recent_homework), /classroom/my-classes scoped to assigned classes only (excludes unassigned + cross-school), homework CRUD with 403 on unassigned/cross-school create, student & parent read-only visibility scoped to own class, cross-school hide + 403 on cross-school delete, teacher can only delete own items, student cannot create/delete, file upload (PDF) + material create + authenticated download via /api/files (cookie/header/query all supported), video CRUD with same isolation, attendance regression for teacher assigned/unassigned + persistence, logout clears session, teacher cannot change own role. Result: 24/24 PASS. Combined regression 84/84 (backend_test 32 + founder_portal 28 + classroom 24) in 33.6s. Frontend Playwright smoke: teacher login auto-routes to TeacherDashboard (all 6 stat cards, quick-actions grid, welcome+school name+subject chips, recent homework); My Classes shows only assigned class with section + student count + subjects; Homework/Videos create flows work end-to-end via modals with data-testids; created items visible in list and persist after page refresh.",
+  "backend_issues": {
+    "critical": [],
+    "minor": []
+  },
+  "frontend_issues": {
+    "ui_bugs": [],
+    "integration_issues": [],
+    "design_issues": [
+      {"screen": "All Create dialogs (homework/material/video)", "issues": ["Radix DialogContent missing Description/aria-describedby - a11y warning (console)"]}
+    ]
+  },
+  "test_report_links": [
+    "/app/backend/tests/test_classroom.py",
+    "/app/test_reports/pytest/iter3_classroom.xml",
+    "/app/test_reports/pytest/iter3_all.xml"
+  ],
+  "action_items": [
+    "Optional: add DialogDescription (or aria-describedby) to Homework/Material/Video/Confirm dialogs to silence Radix a11y warnings."
+  ],
+  "critical_code_review_comments": [
+    "FIXED (I applied): /api/upload previously rejected .pdf even though frontend accept='.pdf,...' and spec says 'PDF/image file'. Added 'pdf' to ALLOWED_IMAGE_EXT in /app/backend/storage.py.",
+    "FIXED (I applied): /api/files/{path} download only read Authorization header or ?auth= query - it ignored the httpOnly access_token cookie. This broke plain <a href> downloads from Materials.jsx and Homework.jsx attachment links which rely on browser-sent cookies. Added cookie fallback in /app/backend/routes_files.py.",
+    "routes_classroom.read_query() correctly scopes by role: founder=all, teacher=assigned_classes, student=own class, parent=children class ids, school_admin/principal=whole school; and uses ['__none__'] sentinel to avoid empty-$in leaks - solid.",
+    "assert_can_create() correctly enforces teacher-assigned-class-only for POST /classroom/*.",
+    "Delete rule: teacher can only delete own item (teacher_id == self); students/parents blocked; cross-school blocked via assert_school_access -- covered by tests.",
+    "TeacherDashboard uses `my` filter = teacher_id which correctly counts only self-created items even if teacher moves classes.",
+    "MINOR: /api/upload MIME whitelist is thin (5 image types + pdf). Consider validating content-type against extension to prevent MIME spoofing (a client can rename .exe to .pdf and upload).",
+    "MINOR: routes_files.download uses raw jwt.decode - it does not verify token 'type' == access or the user's token_version. A stale/refresh/tampered access token could still fetch files. Consider reusing get_current_user semantics.",
+    "MINOR: /classroom/my-classes iterates assigned_classes with per-class count_documents (O(N)); acceptable for typical teacher load (<10 classes).",
+    "MINOR: HomeworkInput/MaterialInput/VideoInput have no length caps on title/description; consider Pydantic max_length to prevent abuse.",
+    "MINOR: Homework fileUrl in frontend is `${baseURL}/files/${p}` - works now that cookie auth is supported. Otherwise the <a> tag download would need ?auth=<token> which is not available with httpOnly cookies."
+  ],
+  "updated_files": [
+    "/app/backend/storage.py (allow pdf in ALLOWED_IMAGE_EXT)",
+    "/app/backend/routes_files.py (accept access_token cookie in /files/{path} download; message updated)",
+    "/app/backend/tests/test_classroom.py (new - 24 tests)"
+  ],
+  "success_rate": {
+    "backend": "100% (24/24 new + 60/60 regression = 84/84)",
+    "frontend": "100% of tested flows (teacher login, dashboard, my-classes, homework create, video create, persistence after refresh)"
+  },
+  "test_credentials": "Founder: mahatofauji@gmail.com / ManiFounder@2026. Backend tests self-provision schools/users per RUN (see test_classroom.py). UI-smoke seed used: uiteach_14e459@x.com / Teach@2026 (school 'UI School 14e459', class 'Grade 5' assigned, subjects Math/Science).",
+  "seed_data_creation": "24 backend tests seed 2 TEST schools with class/section/teacher/student/parent each (unique per RUN), then homework/material/video items. UI-smoke created 1 additional school+admin+teacher+class+student.",
+  "retest_needed": false,
+  "main_agent_can_self_test": true,
+  "context_for_next_testing_agent": "Three regression suites live at /app/backend/tests/: backend_test.py (32), test_founder_portal.py (28), test_classroom.py (24). Run all: `pytest backend/tests/ -o addopts= -v`. Teacher-portal integration verified end-to-end. Key data-testids for future UI tests: quick-actions, stat cards on TeacherDashboard, my-classes-grid, add-homework-button/hw-class-select/hw-title-input/hw-file-input/save-homework-button (same pattern for mat-/vid-), homework-list/materials-list/videos-list. Note: /api/files/{path} now supports 3 auth modes (cookie, Bearer, ?auth=).",
+  "rca of the issue": "Two backend integration bugs found & fixed this iteration: (1) PDF upload blocked - ALLOWED_IMAGE_EXT set omitted 'pdf' although MIME_TYPES already mapped 'pdf'->'application/pdf' and both material and homework frontend forms accept .pdf. Repro: POST /api/upload with a .pdf file -> 400 'Only image files ... are allowed'. Mitigation: added 'pdf' to ALLOWED_IMAGE_EXT in storage.py. (2) File download 401 for browser <a href> - the /api/files/{path} handler only inspected Authorization header and ?auth= query and did not fall back to the httpOnly access_token cookie. Since the frontend uses <a href={baseURL}/files/${path}> for attachment/material downloads, browsers send cookies automatically but the endpoint ignored them, returning 401. Mitigation: added `else: token = request.cookies.get('access_token')` fallback in routes_files.py."
+}

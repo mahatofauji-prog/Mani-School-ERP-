@@ -1,0 +1,32 @@
+{
+  "summary": "Iteration 4 - Parent portal per-child scoping tested end-to-end. Added /app/backend/tests/test_parent_portal.py with 21 tests covering: parent GET /users/{child} allowed for linked children (200) and forbidden for unlinked (403) & cross-school (403); GET /classroom/homework?student_id={child} scoped to that child's class only (child1 sees HW-C1, child2 sees HW-C2, mutually exclusive); unlinked & cross-school student_id -> 403; parent without student_id sees both children's classes (union via child_class_ids); materials/videos scope similarly per child; parent cannot POST homework (403). Attendance per-child: 200 with linked, 403 with unlinked, default query returns only linked children's records. Student regression: sees only own class HW, cannot POST/DELETE (403). Teacher regression: my-classes shows exactly assigned classes, cannot post to unassigned class (403). Result: 21/21 PASS. Full regression 105/105 (backend_test 32 + founder_portal 28 + classroom 24 + parent_portal 21) in 48.7s. Frontend Playwright: seeded fresh school+2 classes+2 linked children (Alice/C1, Bob/C2)+1 unlinked+teacher+parent+HW-per-class+attendance; parent login OK -> /app; Children page shows child-switcher with both tabs (child-tab-<email>); default child (Alice) view shows only UI4HW-C1-* and NOT UI4HW-C2-*; clicking Bob tab switches to only UI4HW-C2-* and Attendance 100% (1 present / 1 recorded); child-homework-list testid present; state persists after page reload; Sign out returns to /login. Only console messages are two pre-login /auth/me 401 probes (expected).",
+  "backend_issues": {"critical": [], "minor": []},
+  "frontend_issues": {
+    "ui_bugs": [],
+    "integration_issues": [],
+    "design_issues": []
+  },
+  "test_report_links": [
+    "/app/backend/tests/test_parent_portal.py",
+    "/app/test_reports/pytest/iter4_parent.xml",
+    "/app/test_reports/pytest/iter4_all.xml"
+  ],
+  "action_items": [],
+  "critical_code_review_comments": [
+    "routes_classroom.listing() per-child scoping: when parent provides student_id, it correctly (a) asserts student_id is in user.linked_student_ids -> 403 otherwise, and (b) overrides q.class_id to the child's class_id. If the linked child doc is missing/deleted, it falls back to '__none__' sentinel (safe empty result). Solid.",
+    "routes_attendance.get_attendance parent branch: validates student_id in linked_student_ids and defaults to $in linked list - correct.",
+    "routes_users.get_user parent branch: only allows self OR linked children -> 403 otherwise. Correct.",
+    "Frontend Children.jsx uses linked_student_ids from AuthContext (JWT claims). Note: if a school admin later ADDS a new linked child, the parent will need to re-login (or /auth/me refresh) to see the new tab since it comes from the token. Not a bug per se, but worth documenting.",
+    "MINOR: Children.jsx passes attachment_path via <a href={baseURL}/files/{p}> which relies on cookie auth (already fixed in iter 3). If path contains slashes it may not encode properly - consider encodeURIComponent-per-segment.",
+    "MINOR: parent listing without student_id runs a $in of children's class_ids - if a linked child has no class_id or is deleted, that child's data is filtered out via '__none__' sentinel. Good.",
+    "MINOR: Children.jsx does not handle the isLoading state of attendance/homework queries separately - momentary blank between tabs is acceptable but could show a small spinner."
+  ],
+  "updated_files": ["/app/backend/tests/test_parent_portal.py"],
+  "success_rate": {"backend": "100% (21/21 new + 84/84 regression = 105/105)", "frontend": "100% (parent login, child-switcher, per-child HW scoping, attendance %, refresh persistence, logout)"},
+  "test_credentials": "Founder: mahatofauji@gmail.com / ManiFounder@2026. All parent/teacher/student/admin accounts are provisioned per RUN inside test_parent_portal.py and the UI smoke seed. No manual seeding needed.",
+  "seed_data_creation": "Per test run, 2 fresh TEST schools with 2 classes each, 3 students in School A (2 linked + 1 unlinked), 1 teacher assigned both classes, 1 parent linked to 2 children, homework/materials/videos + attendance records for both children.",
+  "retest_needed": false,
+  "main_agent_can_self_test": true,
+  "context_for_next_testing_agent": "Four regression suites live at /app/backend/tests/: backend_test.py (32), test_founder_portal.py (28), test_classroom.py (24), test_parent_portal.py (21). Run all: `pytest backend/tests/ -o addopts= -v` -> 105/105 in ~48s. Parent portal per-child scoping fully covered. New param verified: GET /api/classroom/{homework|materials|videos}?student_id=<linkedChildId> for parents. Key data-testids for future UI tests: child-switcher, child-tab-<email>, child-homework-list on /app/children. Auth-related note: parent Children view derives linked children from AuthContext (JWT); a re-login is needed after admin updates linked_student_ids.",
+  "rca of the issue": "No issues found in this iteration. All new per-child scoping behavior (backend + frontend) works end-to-end."
+}

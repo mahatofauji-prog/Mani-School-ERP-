@@ -1,0 +1,130 @@
+{
+  "users": [
+    {
+      "id": "founder_admin_default",
+      "name": "Founder Admin",
+      "email": "mahatofauji@gmail.com",
+      "phone": "+91 9999999999",
+      "password": "ManiFounder@2026",
+      "role": "founder_admin",
+      "school_id": null,
+      "school_name": "Platform Administration",
+      "status": "active",
+      "created_at": 1789381955971,
+      "data": "{}"
+    },
+    {
+      "id": "founder_admin_alias",
+      "name": "Founder Admin",
+      "email": "founder@mani.edu",
+      "phone": "+91 9999999999",
+      "password": "ManiFounder@2026",
+      "role": "founder_admin",
+      "school_id": null,
+      "school_name": "Platform Administration",
+      "status": "active",
+      "created_at": 1789381955971,
+      "data": "{}"
+    }
+  ],
+  "schools": [],
+  "plans": [],
+  "subscriptions": [],
+  "invoices": [],
+  "classes": [
+    {
+      "id": "cls_test_1",
+      "name": "Class 1",
+      "school_id": "sch_demo",
+      "data": "{}"
+    },
+    {
+      "id": "ca18d8805cd990c639636f41",
+      "name": "Class 1",
+      "school_id": "sch_demo",
+      "data": "{}"
+    },
+    {
+      "id": "352d3dd0fe2af281c08382d0",
+      "name": "Persistent Class X",
+      "school_id": "sch_demo",
+      "data": "{}"
+    }
+  ],
+  "sections": [
+    {
+      "id": "814d58d879a0170bd9c476f4",
+      "name": "Section A",
+      "class_id": "ca18d8805cd990c639636f41",
+      "school_id": "sch_demo",
+      "data": "{}"
+    }
+  ],
+  "subjects": [],
+  "attendance": [],
+  "homework": [],
+  "materials": [],
+  "generic_documents": [],
+  "audit_logs": [
+    {
+      "id": "5120f924218d908c99415322",
+      "actor_id": "test_principal",
+      "actor_name": "Principal Demo",
+      "actor_role": "principal",
+      "school_id": "sch_demo",
+      "action": "create_classes",
+      "target": "ca18d8805cd990c639636f41",
+      "timestamp": "2026-09-14T10:32:46.753Z"
+    },
+    {
+      "id": "9f2e0da9758f32a739002fdc",
+      "actor_id": "test_principal",
+      "actor_name": "Principal Demo",
+      "actor_role": "principal",
+      "school_id": "sch_demo",
+      "action": "create_sections",
+      "target": "814d58d879a0170bd9c476f4",
+      "timestamp": "2026-09-14T10:32:47.040Z"
+    },
+    {
+      "id": "01c5e6a2e0aff97adb2117f8",
+      "actor_id": "test_principal",
+      "actor_name": "Principal Demo",
+      "actor_role": "principal",
+      "school_id": "sch_demo",
+      "action": "create_classes",
+      "target": "f5af4b3c929796aa9c93eec4",
+      "timestamp": "2026-09-14T10:32:53.434Z"
+    },
+    {
+      "id": "31bba100f4f789fd09234c98",
+      "actor_id": "test_principal",
+      "actor_name": "Principal Demo",
+      "actor_role": "principal",
+      "school_id": "sch_demo",
+      "action": "update_classes",
+      "target": "f5af4b3c929796aa9c93eec4",
+      "timestamp": "2026-09-14T10:32:53.706Z"
+    },
+    {
+      "id": "0cbc86e92a8020390940fb89",
+      "actor_id": "test_principal",
+      "actor_name": "Principal Demo",
+      "actor_role": "principal",
+      "school_id": "sch_demo",
+      "action": "delete_classes",
+      "target": "f5af4b3c929796aa9c93eec4",
+      "timestamp": "2026-09-14T10:32:53.848Z"
+    },
+    {
+      "id": "8f26cc130e1849c17c155627",
+      "actor_id": "test_principal",
+      "actor_name": "Principal Demo",
+      "actor_role": "principal",
+      "school_id": "sch_demo",
+      "action": "create_classes",
+      "target": "352d3dd0fe2af281c08382d0",
+      "timestamp": "2026-09-14T10:32:58.514Z"
+    }
+  ]
+}

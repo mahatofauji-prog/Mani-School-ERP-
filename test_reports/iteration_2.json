@@ -1,0 +1,32 @@
+{
+  "summary": "Iteration 2 - Founder/Super Admin portal end-to-end testing. Added /app/backend/tests/test_founder_portal.py with 28 tests covering: founder dashboard (5 range values), schools extended create+details+admins+duplicate-code 409, SUSPEND blocks school users' login and reactivate restores it (CRITICAL passed), per-school module gating disables attendance both client (nav) and server (POST /api/attendance -> 403), plans CRUD + persistence, subscription assignment, global users w/ school_name enrichment + disable/enable blocks login, global search by school code and admin email, announcements all-vs-targeted isolation, system health, platform settings persistence, audit logs record founder actions. Result: 28/28 PASS in 9.8s. Previous iteration_1 suite (32/32) still valid; combined regression 60/60. Frontend UI verified via Playwright: founder login auto-routes to /app Master Console with all stat cards + Today/Week/Month/Year/All-time range filter functional, sidebar navigation for Dashboard, All Schools, Global Users, Plans, Subscriptions, Feature Modules, Announcements, Audit Logs, System Health, Platform Settings all load with 0 errors, global search input returns matching TEST schools with code+city, Platform Settings form displays and persists session timeout=45. All expected data-testids present (founder-sidebar-nav, nav-*, range-*, global-search-input, stat-*, logout-button, header-username).",
+  "backend_issues": {"critical": [], "minor": []},
+  "frontend_issues": {"ui_bugs": [], "integration_issues": [], "design_issues": []},
+  "test_report_links": [
+    "/app/backend/tests/test_founder_portal.py",
+    "/app/backend/tests/backend_test.py",
+    "/app/test_reports/pytest/iter2_founder.xml"
+  ],
+  "action_items": [],
+  "critical_code_review_comments": [
+    "Login route correctly blocks non-founder users when school.status != 'active' with 403 (routes_auth.py L64-73); returns explicit 'suspended' language required by spec.",
+    "require_module dependency (auth_utils L140) correctly bypasses founder and enforces enabled_modules on POST /api/attendance.",
+    "attach_school_context enriches /auth/me & /auth/login responses with enabled_modules so frontend can gate nav — implemented and returned.",
+    "routes_platform.global_search uses re.escape() to prevent regex injection — good; case-insensitive; scans schools by name/code/city, users by name/email.",
+    "routes_announcements list filter uses target_type=all OR school_ids contains sid + status active + start/expiry date window — targeted isolation confirmed via test.",
+    "routes_users.set_status increments token_version, invalidating any existing session for disabled user (verified indirectly: login returns 403 for status!=active).",
+    "MINOR: routes_platform.global_search does an extra bson import via __import__ inside a loop — cosmetic; consider top-level import.",
+    "MINOR: routes_platform.health imports storage.init_storage inside try — fine but could be cached; storage returned 'operational' in test.",
+    "MINOR: routes_dashboard.stats top_schools performs O(N) count_documents per school in a loop; will not scale beyond a few hundred schools — consider aggregation pipeline when scale increases.",
+    "MINOR: /api/schools/{id}/subscription overwrites the whole subscription object with model_dump defaults — acceptable (spec matches), but PATCH-semantic would prefer merging.",
+    "OBSERVATION: seed_founder idempotency + bcrypt/httpOnly cookies still verified via iteration_1 suite. No security regressions found."
+  ],
+  "updated_files": ["/app/backend/tests/test_founder_portal.py (new)"],
+  "success_rate": {"backend": "100% (28/28 new + 32/32 regression)", "frontend": "100% of tested flows"},
+  "test_credentials": "Founder: mahatofauji@gmail.com / ManiFounder@2026. Created for this run (RUN=<see xml>): it2_admin_a_<RUN>@example.com / AdminPass@2026, it2_admin_b_<RUN>@example.com / AdminPass@2026 (School B), it2_admin2_a_<RUN>@example.com / Admin2Pass@2026 (extra admin School A), it2_tmp_admin_<RUN>@example.com / TmpPass@2026 (School B).",
+  "seed_data_creation": "Created 2 TEST schools ('TEST School A/B <RUN>') with unique codes IT2A<...>/IT2B<...>, each with one primary school admin + extras, one TEST_Plan, and 2 TEST announcements per run. Left in DB (safe: TEST_ prefixes, unique per run).",
+  "retest_needed": false,
+  "main_agent_can_self_test": true,
+  "context_for_next_testing_agent": "Two regression suites now live: /app/backend/tests/backend_test.py (iter1 - 32 tests, multi-tenant matrix) and /app/backend/tests/test_founder_portal.py (iter2 - 28 tests, founder portal). Run with `pytest backend/tests/ -o addopts= -v` (project pytest.ini uses xdist; -o addopts= disables it if needed). Backend & frontend integration proven for: suspend/reactivate school, per-school module gating (attendance), plans CRUD, subscription assignment, announcement targeting, global user disable, global search, platform settings persistence, audit logging.",
+  "rca of the issue": "No issues found."
+}

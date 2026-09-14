@@ -1,0 +1,34 @@
+{
+  "summary": "Iteration 5 - School Profile (my-school) end-to-end tested. Added /app/backend/tests/test_my_school.py with 14 pytest tests covering: GET /api/my-school for school_admin returns own school (id/code/name match), admin B gets own only (id!=A), principal can read (200), founder cannot use (403); PUT /api/my-school updates all whitelisted editable fields (name, principal_name, email, phone, website, board, academic_year, timings, working_days, city, state, pincode, address, description) - verified via GET after update; founder-controlled fields code/status/enabled_modules/subscription/plan are IGNORED (before/after values identical after PUT that includes them); principal PUT -> 403, founder PUT -> 403, empty payload -> 400, payload with only founder fields -> 400 (whitelist filter yields no updates); tenant isolation: admin cannot GET /api/schools (403), admin cannot PUT /api/schools/{other_id} or /api/schools/{own_id} via founder endpoint (403), school A and B fully isolated. Result: 14/14 PASS. Full regression 119/119 (backend_test 32 + founder_portal 28 + classroom 24 + parent_portal 21 + my_school 14) in 52.3s. Frontend Playwright: seeded fresh school+admin via API; login as school_admin -> /app; sidebar contains 'School Profile' link (nav item renders); navigated to /app/school-profile; locked bar shows original Code UI55434DB and Status active (set by platform); edited name/principal_name/address; clicked save-school-profile-button; page.reload() -> values persisted (Edited UI5 5434db / Principal UI5 / Playwright Lane 123); founder-view GET /api/schools/{id} confirms code unchanged from original. Screenshot matches expected layout - clean form, testids present, no console errors (only pre-login /auth/me 401 probe, expected).",
+  "backend_issues": {"critical": [], "minor": []},
+  "frontend_issues": {
+    "ui_bugs": [],
+    "integration_issues": [],
+    "design_issues": []
+  },
+  "test_report_links": [
+    "/app/backend/tests/test_my_school.py",
+    "/app/test_reports/pytest/iter5_myschool.xml",
+    "/app/test_reports/pytest/iter5_all.xml"
+  ],
+  "action_items": [],
+  "critical_code_review_comments": [
+    "routes_myschool.EDITABLE whitelist correctly excludes founder fields (code, status, enabled_modules, subscription, plan). Filter `{k: v for k, v in ... if v is not None and k in EDITABLE}` guarantees any client-supplied founder field is dropped server-side - solid defense.",
+    "school_id is derived from `user['school_id']` (session/JWT) never from request body/path - correct tenant scoping. Update query also enforces `status: {$ne: deleted}` preventing edits to deleted schools.",
+    "GET allowed for school_admin+principal via require_roles; PUT restricted to school_admin only via require_roles(ROLE_SCHOOL_ADMIN). Matches spec.",
+    "Audit log entry written after update with the list of changed field keys - good for traceability.",
+    "MINOR: PUT with only founder-controlled fields returns 400 'No valid fields to update'. Consider whether to log/audit this as a suspicious event (attempted privileged field change) - currently silently dropped without audit trail.",
+    "MINOR: Pydantic ProfileUpdate does not declare code/status/enabled_modules/subscription/plan, so Pydantic drops those keys before they reach EDITABLE filter - defense-in-depth is fine, but note that FastAPI 200s on unknown extra fields (default config). Explicit model_config with extra='ignore' would document intent.",
+    "MINOR: SchoolProfile.jsx save() sends `payload[k] = form[k] || ''` which converts undefined -> empty string. Since backend treats None as skip, empty string will overwrite server values with '' (e.g. clearing an unset website). If a user opens the page with some fields blank and saves, those fields get set to '' explicitly. Not a data loss risk today, but worth noting.",
+    "MINOR: SchoolProfile.jsx does not disable form during isLoading state on refetch - low impact.",
+    "OBSERVATION: No confirmation/dirty-state check before navigating away from unsaved edits. Nice-to-have."
+  ],
+  "updated_files": ["/app/backend/tests/test_my_school.py"],
+  "success_rate": {"backend": "100% (14/14 new + 105/105 regression = 119/119)", "frontend": "100% (login, nav, GET/PUT round-trip, refresh persistence, locked-field display)"},
+  "test_credentials": "Founder: mahatofauji@gmail.com / ManiFounder@2026. School admins & principals are provisioned per-run inside test_my_school.py fixtures. No manual seeding needed.",
+  "seed_data_creation": "Per test run: 2 fresh schools (A, B) each with a School Admin via POST /api/schools; 1 principal added under School A via POST /api/users (school_admin flow). UI test seeded 1 additional school+admin.",
+  "retest_needed": false,
+  "main_agent_can_self_test": true,
+  "context_for_next_testing_agent": "Five regression suites at /app/backend/tests/: backend_test.py (32), test_founder_portal.py (28), test_classroom.py (24), test_parent_portal.py (21), test_my_school.py (14). Run all: `pytest backend/tests/ -o addopts= -v` -> 119/119 in ~52s. My-school data-testids: school-name-input, school-principal_name-input, school-email-input, school-phone-input, school-website-input, school-board-input, school-academic_year-input, school-timings-input, school-working_days-input, school-city-input, school-state-input, school-pincode-input, school-address-input, save-school-profile-button. Nav label: 'School Profile' visible for school_admin role only.",
+  "rca of the issue": "No issues found in this iteration. Founder-field lock, tenant isolation, principal read-only vs admin edit, and existing regression suites all pass."
+}

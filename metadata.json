@@ -1,0 +1,6 @@
+{
+  "name": "Mani School ERP",
+  "description": "A highly robust, secure, and intuitive School ERP platform featuring multi-tenant isolation, real-time analytics, user administration, subscription planning, and academic logs.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

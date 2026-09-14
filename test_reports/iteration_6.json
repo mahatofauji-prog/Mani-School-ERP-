@@ -1,0 +1,28 @@
+{
+  "summary": "Iteration 6 - PIN Quick Login (extension) tested end-to-end. Added /app/backend/tests/test_pin_login.py with 14 pytest tests covering: enable (200, /me shows pin_enabled=true, no pin_hash in login/me/refresh/pin-login/set-pin responses), input validation (short/long/non-numeric -> 400), auth required (401 unauth on set-pin), pin-login success (200, correct role+school, cookies work for subsequent /me), wrong PIN -> 401 'Invalid PIN', unknown email -> 401, no-PIN user -> 401, change-PIN (old fails / new works), disable (200, pin-login 401 after, password login still works, /me shows pin_enabled=false), inactive user cannot pin-login (403), suspended school blocks pin-login (403 with 'school ... suspended' message). Result: 14/14 PASS. Full regression across all 6 suites: 133/133 in ~1m57s (backend_test 32, classroom 24, founder_portal 28, my_school 14, parent_portal 21, pin_login 14). Frontend Playwright: seeded fresh school+admin via API, logged in via password path (login-email-input/login-password-input/login-submit-button), navigated to Profile, entered PIN in pin-input, clicked save-pin-button -> disable-pin-button appears, localStorage.mani_quick_email = admin email; signed out, /login shows pin-login-form prefilled with admin email; use-password-instead toggles back; use-pin-instead toggles forward; submitted PIN via pin-login-submit -> lands on /app; opened Profile, clicked disable-pin-button -> disable button disappears, localStorage.mani_quick_email cleared, 'Quick Login disabled' toast shown. No console errors (only expected pre-login /auth/me 401 probe).",
+  "backend_issues": {"critical": [], "minor": []},
+  "frontend_issues": {"ui_bugs": [], "integration_issues": [], "design_issues": []},
+  "test_report_links": [
+    "/app/backend/tests/test_pin_login.py",
+    "/app/test_reports/pytest/iter6_pin.xml",
+    "/app/test_reports/pytest/iter6_all.xml"
+  ],
+  "action_items": [],
+  "critical_code_review_comments": [
+    "auth_utils.public_user() strips both password_hash and pin_hash and derives pin_enabled from presence of pin_hash - single choke point ensures /login, /me, /refresh, /pin-login, /set-pin all return safe payloads. Verified programmatically in tests via recursive _no_pin_hash walker.",
+    "routes_auth.pin_login mirrors password login for status/tenant gates AND brute-force lockout (identifier prefixed 'pin:' so PIN attempts don't contaminate password lockout and vice-versa). Correct isolation.",
+    "set-pin re-hashes with bcrypt via hash_password (same helper as passwords) - $2b$ format guaranteed. Disable does $unset pin_hash AND $set pin_enabled:false - clean two-op update.",
+    "MINOR: pin_login does NOT bump token_version, so if a user had an active password session and then does pin-login on another device, the old session remains valid. This matches password login behavior (no rotation), but worth documenting as an intentional design choice - PIN is a *login method*, not a session-security event.",
+    "MINOR: disable-pin does not clear the pin-login brute-force counter (login_attempts entry keyed by 'pin:{ip}:{email}'). If a user was near lockout and disabled+re-enabled, stale counter persists. Low impact given 15-min TTL, but consider deleting on disable-pin for hygiene.",
+    "MINOR: Login.jsx reads localStorage.mani_quick_email once at module init (useState initializer). If the user disables PIN in another tab, this page won't reflect it until reload. Acceptable trade-off for MVP.",
+    "OBSERVATION: PIN input in Login.jsx uses type='password' + inputMode='numeric' + maxLength=6 - good UX for mobile numeric keypad while masking. Same in Profile QuickLoginCard.",
+    "OBSERVATION: /auth/set-pin uses ObjectId(user['_id']) directly via user dict from get_current_user - correct, no cross-user pin write possible."
+  ],
+  "updated_files": ["/app/backend/tests/test_pin_login.py"],
+  "success_rate": {"backend": "100% (14/14 new + 119/119 regression = 133/133)", "frontend": "100% (enable, prefill, toggles, pin-login, disable, localStorage sync)"},
+  "test_credentials": "Founder: mahatofauji@gmail.com / ManiFounder@2026. All school admins/teachers/students are provisioned per-run by fixtures in test_pin_login.py.",
+  "seed_data_creation": "Per test run: 1 fresh school + 1 admin + 1 teacher + 1 student + (for disabled-user gate) 1 extra teacher. Frontend Playwright: 1 additional school + admin.",
+  "retest_needed": false,
+  "main_agent_can_self_test": true,
+  "context_for_next_testing_agent": "Six regression suites at /app/backend/tests/ (133 tests, ~2 min): backend_test.py (32), test_classroom.py (24), test_founder_portal.py (28), test_my_school.py (14), test_parent_portal.py (21), test_pin_login.py (14). Run all: `pytest backend/tests/ -o addopts= -v`. Note: user status changes use PATCH /api/users/{id}/status with body {status: 'active'|'inactive'|'suspended'}, and school status via PATCH /api/schools/{id}/status - NOT PUT. PIN endpoints: POST /api/auth/set-pin (auth, {pin}), POST /api/auth/disable-pin (auth), POST /api/auth/pin-login (public, {email,pin}). PIN validation: 4-6 digits numeric only. Frontend testids: pin-input, save-pin-button, disable-pin-button (Profile); pin-login-form, pin-login-input, pin-login-submit, use-password-instead, use-pin-instead (Login). localStorage key: 'mani_quick_email' set on set-pin, cleared on disable-pin."
+}

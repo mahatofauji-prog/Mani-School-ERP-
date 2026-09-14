@@ -1,0 +1,83 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    function isAuthenticated() {
+      return request.auth != null;
+    }
+    
+    function getUserData() {
+      return get(/databases/$(database)/documents/users/$(request.auth.uid)).data;
+    }
+
+    function isFounderAdmin() {
+      return isAuthenticated() && (
+        request.auth.token.email == "mahatofauji@gmail.com" || 
+        (exists(/databases/$(database)/documents/users/$(request.auth.uid)) && getUserData().role == 'founder_admin')
+      );
+    }
+
+    match /{document=**} {
+      allow read, write: if false;
+    }
+
+    match /users/{userId} {
+      allow read: if isAuthenticated();
+      allow create, update, delete: if isAuthenticated();
+    }
+
+    match /plans/{planId} {
+      allow read: if true;
+      allow write: if isAuthenticated();
+    }
+
+    match /schools/{schoolId} {
+      allow read, write: if isAuthenticated();
+    }
+
+    match /classes/{classId} {
+      allow read, write: if isAuthenticated();
+    }
+    match /sections/{sectionId} {
+      allow read, write: if isAuthenticated();
+    }
+    match /students/{studentId} {
+      allow read, write: if isAuthenticated();
+    }
+    match /teachers/{teacherId} {
+      allow read, write: if isAuthenticated();
+    }
+    match /parents/{parentId} {
+      allow read, write: if isAuthenticated();
+    }
+    match /subjects/{subjectId} {
+      allow read, write: if isAuthenticated();
+    }
+    match /attendance/{attId} {
+      allow read, write: if isAuthenticated();
+    }
+    match /exams/{examId} {
+      allow read, write: if isAuthenticated();
+    }
+    match /results/{resultId} {
+      allow read, write: if isAuthenticated();
+    }
+    match /homework/{hwId} {
+      allow read, write: if isAuthenticated();
+    }
+    match /timetable/{ttId} {
+      allow read, write: if isAuthenticated();
+    }
+    match /notices/{noticeId} {
+      allow read, write: if isAuthenticated();
+    }
+    match /fees/{feeId} {
+      allow read, write: if isAuthenticated();
+    }
+    match /invoices/{invId} {
+      allow read, write: if isAuthenticated();
+    }
+    match /audit_logs/{logId} {
+      allow read, write: if isAuthenticated();
+    }
+  }
+}
